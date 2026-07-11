@@ -11,7 +11,16 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # -------------------- Download NLTK --------------------
-nltk.download("punkt")
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+try:
+    nltk.data.find('tokenizers/punkt_tab')
+except LookupError:
+    nltk.download('punkt_tab')
+
 nltk.download("stopwords")
 nltk.download("wordnet")
 
@@ -129,7 +138,8 @@ if len(st.session_state.messages) == 0:
         "role":"assistant",
         "content":"👋 Hello! I'm your AI FAQ Assistant. Ask me anything!"
     })
-    # -------------------- Display Chat History --------------------
+    
+# -------------------- Display Chat History --------------------
 for message in st.session_state.messages:
 
     if message["role"] == "user":
