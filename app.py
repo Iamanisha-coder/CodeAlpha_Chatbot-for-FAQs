@@ -3,54 +3,48 @@ import json
 import time
 from difflib import get_close_matches
 
-# ---------------- PAGE CONFIG ---------------- #
-
+# ---------------- Page Configuration ---------------- #
 st.set_page_config(
     page_title="AI FAQ Assistant",
     page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
-# ---------------- LOAD CSS ---------------- #
+# ---------------- Load CSS ---------------- #
+with open("style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-with open("style.css") as css:
-    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
-
-# ---------------- LOAD FAQ ---------------- #
-
+# ---------------- Load FAQ ---------------- #
 with open("faq.json", "r") as f:
     faq = json.load(f)
 
-# ---------------- SESSION STATE ---------------- #
-
+# ---------------- Session State ---------------- #
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "👋 Hello! I'm your AI FAQ Assistant. Ask me anything about Python, AI, Programming or Streamlit."
+            "content": "👋 Hello! I'm your AI FAQ Assistant. Ask me anything about Python, AI, Programming, or Streamlit."
         }
     ]
 
-# ---------------- SIDEBAR ---------------- #
-
+# ---------------- Sidebar ---------------- #
 st.sidebar.title("🤖 AI FAQ Assistant")
 
-st.sidebar.markdown("### Quick Questions")
+st.sidebar.markdown("### 📚 Frequently Asked Questions")
 
-for q in list(faq.keys())[:8]:
-    if st.sidebar.button(q):
+for question in faq.keys():
+    if st.sidebar.button(question):
         st.session_state.messages.append(
-            {"role": "user", "content": q}
+            {"role": "user", "content": question}
         )
-
         st.session_state.messages.append(
-            {"role": "assistant", "content": faq[q]}
+            {"role": "assistant", "content": faq[question]}
         )
+        st.rerun()
 
 st.sidebar.markdown("---")
 
-if st.sidebar.button("🗑️ Clear Chat"):
+if st.sidebar.button("🗑 Clear Chat"):
     st.session_state.messages = [
         {
             "role": "assistant",
@@ -59,84 +53,70 @@ if st.sidebar.button("🗑️ Clear Chat"):
     ]
     st.rerun()
 
-# ---------------- HEADER ---------------- #
-
+# ---------------- Header ---------------- #
 st.markdown(
 """
 <div class="hero">
-
 <h1>🤖 AI FAQ Assistant</h1>
-
-<p>Ask anything about Python, AI, Machine Learning and Programming.</p>
-
+<p>Your smart assistant for Programming FAQs</p>
 </div>
 """,
 unsafe_allow_html=True
 )
 
-# ---------------- DISPLAY CHAT ---------------- #
-
+# ---------------- Chat History ---------------- #
 for message in st.session_state.messages:
-
     with st.chat_message(message["role"]):
-
         st.markdown(message["content"])
 
-# ---------------- CHAT INPUT ---------------- #
-
-prompt = st.chat_input("Type your question...")
+# ---------------- User Input ---------------- #
+prompt = st.chat_input("Ask your question here...")
 
 if prompt:
 
+    # User Message
     st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
+        {"role": "user", "content": prompt}
     )
 
     with st.chat_message("user"):
         st.markdown(prompt)
 
-   with st.chat_message("assistant", avatar="🤖"):
+    # Assistant Reply
+    with st.chat_message("assistant"):
 
-    typing = st.empty()
+        with st.spinner("🤖 Thinking..."):
+            time.sleep(1)
 
-    typing.markdown(
-        """
-        <div class="typing">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            match = get_close_matches(
+                prompt,
+                faq.keys(),
+                n=1,
+                cutoff=0.4
+            )
 
-    time.sleep(1.5)
+            if match:
+                answer = faq[match[0]]
+            else:
+                answer = (
+                    "❌ Sorry, I don't know the answer.\n\n"
+                    "Try asking another programming-related question."
+                )
 
-    match = get_close_matches(
-        prompt,
-        faq.keys(),
-        n=1,
-        cutoff=0.4
-    )
-
-    if match:
-        answer = faq[match[0]]
-    else:
-        answer = (
-            "😔 Sorry, I couldn't find an answer.<br><br>"
-            "💡 Try asking about Python, AI, Machine Learning, Streamlit, or Programming."
-        )
-
-    typing.empty()
-
-    st.markdown(answer, unsafe_allow_html=True)
+        st.markdown(answer)
 
     st.session_state.messages.append(
-        {
-            "role": "assistant",
-            "content": answer
-        }
+        {"role": "assistant", "content": answer}
     )
+
+# ---------------- Footer ---------------- #
+st.markdown(
+"""
+<hr>
+<center>
+Made with ❤️ by <b>Anisha Tripathi</b><br>
+CodeAlpha Python Programming Internship
+</center>
+""",
+unsafe_allow_html=True
+)
