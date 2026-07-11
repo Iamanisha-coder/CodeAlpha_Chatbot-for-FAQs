@@ -1,0 +1,82 @@
+[
+  {
+    "question": "What is Artificial Intelligence?",
+    "answer": "Artificial Intelligence (AI) is the simulation of human intelligence by machines to perform tasks such as learning, reasoning, and decision-making."
+  },
+  {
+    "question": "What is Machine Learning?",
+    "answer": "Machine Learning is a branch of AI that enables computers to learn from data and improve their performance without being explicitly programmed."
+  },
+  {
+    "question": "What is Deep Learning?",
+    "answer": "Deep Learning is a subset of Machine Learning that uses neural networks with multiple layers to analyze complex patterns in data."
+  },
+  {
+    "question": "What is NLP?",
+    "answer": "Natural Language Processing (NLP) helps computers understand, interpret, and generate human language."
+  },
+  {
+    "question": "What is Python?",
+    "answer": "Python is a simple, powerful programming language widely used for AI, web development, automation, and data science."
+  },
+  {
+    "question": "What is Data Science?",
+    "answer": "Data Science involves collecting, analyzing, and interpreting data to extract meaningful insights."
+  },
+  {
+    "question": "What is Streamlit?",
+    "answer": "Streamlit is a Python framework used to build interactive web applications for machine learning and data science projects."
+  },
+  {
+    "question": "What is a chatbot?",
+    "answer": "A chatbot is a software application that simulates conversations with users through text or voice."
+  },
+  {
+    "question": "What is TF-IDF?",
+    "answer": "TF-IDF stands for Term Frequency-Inverse Document Frequency. It measures the importance of words in a document."
+  },
+  {
+    "question": "What is Cosine Similarity?",
+    "answer": "Cosine Similarity measures how similar two text documents are by comparing the angle between their vectors."
+  },
+  {
+    "question": "What is NLTK?",
+    "answer": "NLTK (Natural Language Toolkit) is a Python library used for Natural Language Processing tasks."
+  },
+  {
+    "question": "What is Scikit-learn?",
+    "answer": "Scikit-learn is a Python library that provides tools for machine learning, including classification, regression, and clustering."
+  },
+  {
+    "question": "What is an algorithm?",
+    "answer": "An algorithm is a step-by-step procedure used to solve a problem or perform a computation."
+  },
+  {
+    "question": "What is cloud computing?",
+    "answer": "Cloud computing delivers computing services such as storage, servers, and software over the internet."
+  },
+  {
+    "question": "What is cybersecurity?",
+    "answer": "Cybersecurity is the practice of protecting computers, networks, and data from cyber threats and attacks."
+  },
+  {
+    "question": "What is a database?",
+    "answer": "A database is an organized collection of data that can be easily accessed, managed, and updated."
+  },
+  {
+    "question": "What is SQL?",
+    "answer": "SQL (Structured Query Language) is used to manage and query relational databases."
+  },
+  {
+    "question": "What is HTML?",
+    "answer": "HTML (HyperText Markup Language) is the standard language used to create web pages."
+  },
+  {
+    "question": "What is CSS?",
+    "answer": "CSS (Cascading Style Sheets) is used to style and design HTML web pages."
+  },
+  {
+    "question": "What is JavaScript?",
+    "answer": "JavaScript is a programming language that makes websites interactive and dynamic."
+  }
+]
