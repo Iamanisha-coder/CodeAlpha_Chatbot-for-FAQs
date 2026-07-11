@@ -1,122 +1,237 @@
 import streamlit as st
 import json
+import os
 import time
-from difflib import get_close_matches
+import string
+import nltk
 
-# ---------------- Page Configuration ---------------- #
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# -------------------- Download NLTK --------------------
+nltk.download("punkt")
+nltk.download("stopwords")
+nltk.download("wordnet")
+
+# -------------------- Page Config --------------------
 st.set_page_config(
-    page_title="AI FAQ Assistant",
+    page_title="AI FAQ Chatbot",
     page_icon="🤖",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ---------------- Load CSS ---------------- #
-with open("style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# -------------------- Load CSS --------------------
+css_file = os.path.join("css", "style.css")
 
-# ---------------- Load FAQ ---------------- #
-with open("faq.json", "r") as f:
-    faq = json.load(f)
+if os.path.exists(css_file):
+    with open(css_file) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# ---------------- Session State ---------------- #
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {
-            "role": "assistant",
-            "content": "👋 Hello! I'm your AI FAQ Assistant. Ask me anything about Python, AI, Programming, or Streamlit."
-        }
+# -------------------- Animated Background --------------------
+st.markdown("""
+<div class="glow"></div>
+<div class="glow2"></div>
+""", unsafe_allow_html=True)
+
+# -------------------- Sidebar --------------------
+with st.sidebar:
+
+    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712109.png", width=120)
+
+    st.title("🤖 AI FAQ Chatbot")
+
+    st.markdown("---")
+
+    st.write("### 💡 Suggested Questions")
+
+    suggestions = [
+        "What is AI?",
+        "What is Machine Learning?",
+        "What is Python?",
+        "What is NLP?",
+        "What is Deep Learning?"
     ]
 
-# ---------------- Sidebar ---------------- #
-st.sidebar.title("🤖 AI FAQ Assistant")
+    for q in suggestions:
+        st.write("•", q)
 
-st.sidebar.markdown("### 📚 Frequently Asked Questions")
+    st.markdown("---")
 
-for question in faq.keys():
-    if st.sidebar.button(question):
-        st.session_state.messages.append(
-            {"role": "user", "content": question}
-        )
-        st.session_state.messages.append(
-            {"role": "assistant", "content": faq[question]}
-        )
+    if st.button("🗑 Clear Chat"):
+        st.session_state.messages = []
         st.rerun()
 
-st.sidebar.markdown("---")
+# -------------------- Title --------------------
+st.markdown("""
+<h1 class='title'>
+🤖 AI FAQ Assistant
+</h1>
+""", unsafe_allow_html=True)
 
-if st.sidebar.button("🗑 Clear Chat"):
-    st.session_state.messages = [
-        {
-            "role": "assistant",
-            "content": "👋 Hello! I'm your AI FAQ Assistant."
-        }
-    ]
-    st.rerun()
+st.markdown("""
+<p class='subtitle'>
+Ask me anything about Artificial Intelligence, Python,
+Machine Learning and NLP.
+</p>
+""", unsafe_allow_html=True)
 
-# ---------------- Header ---------------- #
-st.markdown(
-"""
-<div class="hero">
-<h1>🤖 AI FAQ Assistant</h1>
-<p>Your smart assistant for Programming FAQs</p>
-</div>
-""",
-unsafe_allow_html=True
-)
+# -------------------- Load FAQ --------------------
+with open("faq.json", "r", encoding="utf-8") as file:
+    faq = json.load(file)
 
-# ---------------- Chat History ---------------- #
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+questions = [item["question"] for item in faq]
+answers = [item["answer"] for item in faq]
 
-# ---------------- User Input ---------------- #
-prompt = st.chat_input("Ask your question here...")
+# -------------------- NLP --------------------
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words("english"))
 
-if prompt:
+def preprocess(text):
 
-    # User Message
-    st.session_state.messages.append(
-        {"role": "user", "content": prompt}
+    text = text.lower()
+
+    text = text.translate(
+        str.maketrans('', '', string.punctuation)
     )
 
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    words = nltk.word_tokenize(text)
 
-    # Assistant Reply
+    words = [
+        lemmatizer.lemmatize(word)
+        for word in words
+        if word not in stop_words
+    ]
+
+    return " ".join(words)
+
+processed_questions = [
+    preprocess(q)
+    for q in questions
+]
+
+vectorizer = TfidfVectorizer()
+
+question_vectors = vectorizer.fit_transform(
+    processed_questions
+)
+
+# -------------------- Session State --------------------
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# -------------------- Welcome Message --------------------
+if len(st.session_state.messages) == 0:
+
+    st.session_state.messages.append({
+        "role":"assistant",
+        "content":"👋 Hello! I'm your AI FAQ Assistant. Ask me anything!"
+    })
+    # -------------------- Display Chat History --------------------
+for message in st.session_state.messages:
+
+    if message["role"] == "user":
+        with st.chat_message("user"):
+            st.markdown(message["content"])
+
+    else:
+        with st.chat_message("assistant"):
+            st.markdown(message["content"])
+
+
+# -------------------- Chat Input --------------------
+user_input = st.chat_input("💬 Type your question here...")
+
+if user_input:
+
+    # Show User Message
+    st.session_state.messages.append({
+        "role": "user",
+        "content": user_input
+    })
+
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    # Typing Animation
     with st.chat_message("assistant"):
 
-        with st.spinner("🤖 Thinking..."):
-            time.sleep(1)
+        typing = st.empty()
 
-            match = get_close_matches(
-                prompt,
-                faq.keys(),
-                n=1,
-                cutoff=0.4
+        typing.markdown("""
+        <div class="typing">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        time.sleep(1.5)
+
+        # -------------------- AI Logic --------------------
+        processed_input = preprocess(user_input)
+
+        input_vector = vectorizer.transform([processed_input])
+
+        similarity = cosine_similarity(
+            input_vector,
+            question_vectors
+        )
+
+        best_index = similarity.argmax()
+
+        confidence = similarity[0][best_index]
+
+        if confidence >= 0.35:
+
+            answer = answers[best_index]
+
+        else:
+
+            answer = (
+                "😔 Sorry, I couldn't find an answer to that question.\n\n"
+                "Try asking about:\n"
+                "- Artificial Intelligence\n"
+                "- Machine Learning\n"
+                "- Python\n"
+                "- Deep Learning\n"
+                "- NLP"
             )
 
-            if match:
-                answer = faq[match[0]]
-            else:
-                answer = (
-                    "❌ Sorry, I don't know the answer.\n\n"
-                    "Try asking another programming-related question."
-                )
+        typing.empty()
 
         st.markdown(answer)
 
-    st.session_state.messages.append(
-        {"role": "assistant", "content": answer}
-    )
+    # Save Bot Response
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": answer
+    })
 
-# ---------------- Footer ---------------- #
-st.markdown(
-"""
-<hr>
-<center>
-Made with ❤️ by <b>Anisha Tripathi</b><br>
-CodeAlpha Python Programming Internship
-</center>
-""",
-unsafe_allow_html=True
-)
+
+# -------------------- Footer --------------------
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+st.markdown("""
+<hr style="border:1px solid rgba(255,255,255,0.2);">
+
+<div style="text-align:center; color:white;">
+
+<h4>🤖 AI FAQ Chatbot</h4>
+
+<p>
+Built using
+<b>Python</b> •
+<b>Streamlit</b> •
+<b>NLTK</b> •
+<b>Scikit-Learn</b>
+</p>
+
+<p style="color:#bdbdbd;">
+Made with ❤️ by <b>Anisha Tripathi</b>
+</p>
+
+</div>
+""", unsafe_allow_html=True)
