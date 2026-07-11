@@ -60,7 +60,7 @@ FAQ_Chatbot/
 ### 1. Clone the repository
 
 ```bash
-git clone <https://github.com/Iamanisha-coder/CodeAlpha_Chatbot-for-FAQs>
+git clone <https://github.com/Iamanisha-coder/Chatbot-for-FAQs.git>
 ```
 
 ### 2. Open the project folder
